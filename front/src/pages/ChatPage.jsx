@@ -4,22 +4,21 @@ import stompService from '../utils/socketService';
 import UserList from '../components/UserList';
 import MessageArea from '../components/MessageArea';
 import MessageInput from '../components/MessageInput';
-import { useParams } from 'react-router-dom';
+import './Chat.css'; // Importing the CSS file
 
 const Chat = () => {
-  const { user } = useParams();
-  const [users, setUsers] = useState([]); // Agrega aquí la lógica para obtener los usuarios conectados
+  const [users, setUsers] = useState([]); // Logic for obtaining connected users can be added here
   const [selectedUser, setSelectedUser] = useState('');
   const [messages, setMessages] = useState([]);
-  const [sender, setSender] = useState(''); // Ajusta el valor según el usuario actual
+  const [sender, setSender] = useState(''); // Adjust the value according to the current user
 
   useEffect(() => {
     if (selectedUser) {
       stompService
-        .subscribe(`/messageTo/${selectedUser}`, (msg) => {
-          setMessages((prevMessages) => [...prevMessages, msg]);
-        })
-        .catch((error) => console.error('Error al suscribirse:', error));
+          .subscribe(`/messageTo/${selectedUser}`, (msg) => {
+            setMessages((prevMessages) => [...prevMessages, msg]);
+          })
+          .catch((error) => console.error('Error al suscribirse:', error));
     }
 
     return () => {
@@ -41,22 +40,13 @@ const Chat = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Chat</h1>
-      <UserList users={users} onSelectUser={setSelectedUser} />
-      <MessageArea messages={messages} />
-      <MessageInput onSendMessage={handleSendMessage} />
-    </div>
+      <div className="chat-container">
+        <h1 className="chat-title">Chat</h1>
+        <UserList users={users} onSelectUser={setSelectedUser} />
+        <MessageArea messages={messages} />
+        <MessageInput onSendMessage={handleSendMessage} />
+      </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    fontFamily: 'Arial, sans-serif',
-  },
 };
 
 export default Chat;
