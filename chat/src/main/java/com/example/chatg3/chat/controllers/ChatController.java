@@ -2,12 +2,7 @@ package com.example.chatg3.chat.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.chatg3.chat.model.Chat;
 import com.example.chatg3.chat.model.Message;
@@ -23,6 +18,7 @@ public class ChatController {
     private ChatService chatService;
 
     @PostMapping
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<?> sendMessage(@RequestBody Message message, 
         @ModelAttribute Chat chat) {
         chatService.sendMessage(message, chat.getTo());
@@ -30,6 +26,7 @@ public class ChatController {
     }
 
     @GetMapping
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<?> getChat(@ModelAttribute Chat chat) {
         return ResponseEntity.ok(
             chatService.getChat(chat.getSender(), chat.getTo())
