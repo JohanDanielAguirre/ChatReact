@@ -8,7 +8,7 @@ const MessageArea = ({ messages }) => {
       <ul>
         {messages.map((message, index) => (
           <li key={index}>
-            <strong>{message.sender}:</strong> {message.text}
+            <strong>{message.sender}:</strong> {message.content}
           </li>
         ))}
       </ul>

@@ -7,48 +7,56 @@ import MessageInput from '../components/MessageInput';
 import { useUserContext } from '../components/UserContext'; // Importar UserContext
 import './Chat.css';
 import { useParams } from 'react-router-dom';
+
 const Chat = () => {
     const { users } = useUserContext(); // Obtener usuarios del contexto
     const [selectedUser, setSelectedUser] = useState('');
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([]); // Correcto // Inicializa como un array
     const { user: sender } = useParams(); // Asegúrate de que se establece el usuario actual
+
     useEffect(() => {
-        if (selectedUser) {
             stompService.subscribe(`/messageTo/${sender}`, (msg) => {
                 setMessages((prevMessages) => [...prevMessages, msg]);
             }).catch((error) => console.error('Error al suscribirse:', error));
-        }
-
         return () => {
             if (selectedUser) {
-                stompService.unsubscribe(`/messageTo/${sender}`);
+                stompService.unsubscribe(`/messageTo/${selectedUser}`);
             }
         };
-    }, [sender]);
-
+    }, [sender]); // Añade selectedUser como dependencia
     const handleSendMessage = (message) => {
-        console.log('Mensaje a enviar:', message); // Agrega esto para depuración
-        console.log('Usuario seleccionado:', selectedUser); // Agrega esto para depuración
-        console.log('Usuario actual:', sender); // Agrega esto para depuración
         if (sender && selectedUser && message) {
-            const newMessage = { sender, text: message };
-            stompService.publish(`/sendMessage/${selectedUser}`, newMessage); // Publicar al usuario seleccionado
+            const newMessage = { sender, content: "enviaste: " + message};
+
+            // Publicar al usuario seleccionado
+            stompService.publish(`/messageTo/${selectedUser}`);
             setMessages((prevMessages) => [...prevMessages, newMessage]);
-            setMessages('');
-            fetch('http://localhost:8080/chat?to=${to}', {
-            method: "POST",
+
+            // Enviar el mensaje al servidor mediante fetch
+            fetch(`http://localhost:8080/chat?to=${selectedUser}`, {
+                method: 'POST',
                 headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                sender: sender,
-                to: selectedUser,
-                time: Date.now(),
-                type: "text",
-                content: message,
-                credentials: "include",
-            }),
-        })
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sender: sender,
+                    time: 0,
+                    type: "text",
+                    content: "el usuario "+sender+ " envio el siguiente mensaje: "+ message,
+                }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log('Mensaje enviado al servidor:', data);
+                })
+                .catch((error) => {
+                    console.error('Error al enviar el mensaje:', error);
+                });
         } else {
             alert('Por favor, selecciona un usuario y escribe un mensaje.');
         }
